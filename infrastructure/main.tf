@@ -116,7 +116,7 @@ resource "oci_core_image" "openshift_image" {
   count          = var.create_openshift_instances ? 1 : 0
   compartment_id = var.compartment_ocid
   display_name   = var.cluster_name
-  launch_mode    = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? "PARAVIRTUALIZED" : "NATIVE"
+  launch_mode    = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? "PARAVIRTUALIZED" : "NATIVE"
 
   image_source_details {
     source_type = "objectStorageUri"
@@ -412,7 +412,7 @@ resource "oci_load_balancer_load_balancer" "openshift_api_int_lb" {
   compartment_id             = var.compartment_ocid
   display_name               = "${var.cluster_name}-openshift_api_int_lb"
   shape                      = "flexible"
-  subnet_ids                 = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? [oci_core_subnet.private.id] : [oci_core_subnet.private2[0].id]
+  subnet_ids                 = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? [oci_core_subnet.private.id] : [oci_core_subnet.private2[0].id]
   is_private                 = true
   network_security_group_ids = [oci_core_network_security_group.cluster_lb_nsg.id]
   defined_tags               = local.common_defined_tags
@@ -573,52 +573,52 @@ resource "oci_load_balancer_listener" "openshift_cluster_infra-mcs_2" {
 }
 
 resource "oci_load_balancer_backend" "openshift_cluster_api_backend_set_external_backends" {
-  for_each         = var.create_openshift_instances ? local.cp_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.cp_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_apps_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_api_backend_set_external.name
   port             = 6443
-  ip_address       = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
 }
 
 resource "oci_load_balancer_backend" "openshift_cluster_api_backend_set_internal_backends" {
-  for_each         = var.create_openshift_instances ? local.cp_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.cp_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_int_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_api_backend_set_internal.name
   port             = 6443
-  ip_address       = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
 }
 
 resource "oci_load_balancer_backend" "openshift_cluster_infra-mcs_backend_set_backends" {
-  for_each         = var.create_openshift_instances ? local.cp_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.cp_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_int_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_infra-mcs_backend_set.name
   port             = 22623
-  ip_address       = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
 }
 
 resource "oci_load_balancer_backend" "openshift_cluster_infra-mcs_backend_set_2_backends" {
-  for_each         = var.create_openshift_instances ? local.compute_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.cp_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_int_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_infra-mcs_backend_set_2.name
   port             = 22624
-  ip_address       = ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? data.oci_core_vnic.control_plane_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.control_plane_secondary_vnic[each.key].private_ip_address
 }
 
 
 resource "oci_load_balancer_backend" "openshift_cluster_ingress_https_backend_set_backends" {
-  for_each         = var.create_openshift_instances ? local.compute_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.compute_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_apps_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_ingress_https_backend_set.name
   port             = 443
-  ip_address       = ! local.is_compute_iscsi_type ? data.oci_core_vnic.compute_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.compute_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_compute_iscsi_type ? data.oci_core_vnic.compute_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.compute_secondary_vnic[each.key].private_ip_address
 }
 
 resource "oci_load_balancer_backend" "openshift_cluster_ingress_http_backend_set_backends" {
-  for_each         = var.create_openshift_instances ? local.compute_node_count_per_ad_map : {}
+  for_each         = var.create_openshift_instances ? local.compute_node_map : {}
   load_balancer_id = oci_load_balancer_load_balancer.openshift_api_apps_lb.id
   backendset_name  = oci_load_balancer_backend_set.openshift_cluster_ingress_http_backend_set.name
   port             = 80
-  ip_address       = ! local.is_compute_iscsi_type ? data.oci_core_vnic.compute_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.compute_secondary_vnic[each.key].private_ip_address
+  ip_address       = !local.is_compute_iscsi_type ? data.oci_core_vnic.compute_primary_vnic[each.key].private_ip_address : data.oci_core_vnic.compute_secondary_vnic[each.key].private_ip_address
 }
 
 resource "oci_dns_zone" "openshift" {
@@ -673,7 +673,7 @@ resource "time_sleep" "wait_180_seconds" {
 }
 
 resource "oci_core_vnic_attachment" "control_plane_secondary_vnic_attachment" {
-  for_each = var.create_openshift_instances && (local.is_control_plane_iscsi_type || local.is_compute_iscsi_type) ? local.cp_node_count_per_ad_map : {}
+  for_each = var.create_openshift_instances && (local.is_control_plane_iscsi_type || local.is_compute_iscsi_type) ? local.cp_node_map : {}
   #Required
   create_vnic_details {
     #Optional
@@ -696,7 +696,7 @@ resource "oci_core_vnic_attachment" "control_plane_secondary_vnic_attachment" {
 }
 
 resource "oci_core_vnic_attachment" "compute_secondary_vnic_attachment" {
-  for_each = var.create_openshift_instances && local.is_compute_iscsi_type ? local.compute_node_count_per_ad_map : {}
+  for_each = var.create_openshift_instances && local.is_compute_iscsi_type ? local.compute_node_map : {}
   #Required
   create_vnic_details {
 
@@ -720,10 +720,10 @@ resource "oci_core_vnic_attachment" "compute_secondary_vnic_attachment" {
 }
 
 resource "oci_core_instance" "control_plane_node" {
-  for_each            = var.create_openshift_instances ? local.cp_node_count_per_ad_map : {}
+  for_each            = var.create_openshift_instances ? local.cp_node_map  : {}
   compartment_id      = var.compartment_ocid
-  availability_domain = each.key
-  display_name        = "${var.cluster_name}-cp-${each.value}-ad${regex("\\d+$", each.key)}"
+  availability_domain = each.value.ad_name
+  display_name        = "${var.cluster_name}-cp-${each.value.index}-ad${regex("\\d+$", each.value.ad_name)}"
   shape               = var.control_plane_shape
   defined_tags = {
     "openshift-${var.cluster_name}.instance-role"      = "control_plane"
@@ -757,10 +757,10 @@ resource "oci_core_instance" "control_plane_node" {
 }
 
 resource "oci_core_instance" "compute_node" {
-  for_each            = var.create_openshift_instances ? local.compute_node_count_per_ad_map : {}
+  for_each            = var.create_openshift_instances ? local.compute_node_map : {}
   compartment_id      = var.compartment_ocid
-  availability_domain = each.key
-  display_name        = "${var.cluster_name}-compute-${each.value}-ad${regex("\\d+$", each.key)}"
+  availability_domain = each.value.ad_name
+  display_name        = "${var.cluster_name}-compute-${each.value.index}-ad${regex("\\d+$", each.value.ad_name)}"
   shape               = var.compute_shape
   defined_tags = {
     "openshift-${var.cluster_name}.instance-role"      = "compute"
