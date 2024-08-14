@@ -12,10 +12,10 @@ useInstancePrincipals: true
 compartment: ${var.compartment_ocid}
 vcn: ${oci_core_vcn.openshift_vcn.id}
 loadBalancer:
-  subnet1: ${var.enable_private_dns && !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? oci_core_subnet.private.id : var.enable_private_dns ? oci_core_subnet.private2[0].id : oci_core_subnet.public.id}
+  subnet1: ${var.enable_private_dns && ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? oci_core_subnet.private.id : var.enable_private_dns ? oci_core_subnet.private2[0].id : oci_core_subnet.public.id}
   securityListManagementMode: Frontend
   securityLists:
-    ${var.enable_private_dns && !local.is_control_plane_iscsi_type && !local.is_compute_iscsi_type ? oci_core_subnet.private.id : var.enable_private_dns ? oci_core_subnet.private2[0].id : oci_core_subnet.public.id}: ${var.enable_private_dns ? oci_core_security_list.private.id : oci_core_security_list.public.id}
+    ${var.enable_private_dns && ! local.is_control_plane_iscsi_type && ! local.is_compute_iscsi_type ? oci_core_subnet.private.id : var.enable_private_dns ? oci_core_subnet.private2[0].id : oci_core_subnet.public.id}: ${var.enable_private_dns ? oci_core_security_list.private.id : oci_core_security_list.public.id}
 rateLimiter:
   rateLimitQPSRead: 20.0
   rateLimitBucketRead: 5
