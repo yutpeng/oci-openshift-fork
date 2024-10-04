@@ -101,10 +101,9 @@ if [ "${secondary_if_vlan_tag}" -ne 0 ]; then
       nmcli connection reload
       nmcli connection up "${secondary_if_name}.${secondary_if_vlan_tag}"
       # Remove the ens340np0 connection
-      connection_uuid=$(nmcli -t -f UUID,DEVICE connection show | grep ${secondary_if_name} | cut -d: -f1)
-      if [ -n "$connection_uuid" ]; then
-          nmcli connection delete "$connection_uuid"
-      fi
+      for uuid in $(nmcli -t -f UUID,DEVICE connection show | grep ':--' | cut -d: -f1); do
+        nmcli connection delete "$uuid"
+      done
   fi
 else
     # Create a standard Ethernet connection if VLAN_ID is 0
