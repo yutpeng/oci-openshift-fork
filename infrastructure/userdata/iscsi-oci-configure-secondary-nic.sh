@@ -3,11 +3,11 @@
 set -e
 set -x
 
-if [ ! -d "/sys/firmware/ibft" ]
-then
-  echo "No IBFT configuration found. Skipping."
-  exit 0
-fi
+#if [ ! -d "/sys/firmware/ibft" ]
+#then
+#  echo "No IBFT configuration found. Skipping."
+#  exit 0
+#fi
 
 MTU=9000
 NODEIP_CONF="/etc/systemd/system/kubelet.service.d/30-oci-nodeip.conf"
